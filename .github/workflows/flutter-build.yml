@@ -61,6 +61,11 @@ env:
   UPLOAD_ARTIFACT: "${{ inputs.upload-artifact }}"
   PUBLISH_UPDATE_METADATA: "${{ inputs.publish-update-metadata }}"
   SIGN_BASE_URL: "${{ secrets.SIGN_BASE_URL }}-2"
+  # Self-hosted client settings. Stored as encrypted Actions secrets, never in the repo.
+  RD_BUILD_ID_SERVER: "${{ secrets.RD_BUILD_ID_SERVER }}"
+  RD_BUILD_KEY: "${{ secrets.RD_BUILD_KEY }}"
+  RD_BUILD_API_SERVER: "${{ secrets.RD_BUILD_API_SERVER }}"
+  RD_BUILD_RELAY_SERVER: "${{ secrets.RD_BUILD_RELAY_SERVER }}"
 
 jobs:
   validate-update-metadata-keys:

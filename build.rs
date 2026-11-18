@@ -90,7 +90,34 @@ fn install_android_deps() {
     println!("cargo:rustc-link-lib=OpenSLES");
 }
 
+/// Embed self-hosted server settings that are supplied by CI secrets at build time.
+/// When the variables are unset (local builds), the generated constants are empty and
+/// the client behaves exactly like upstream. Values are never printed to the log.
+fn embed_server_config() {
+    const VARS: [&str; 4] = [
+        "RD_BUILD_ID_SERVER",
+        "RD_BUILD_KEY",
+        "RD_BUILD_API_SERVER",
+        "RD_BUILD_RELAY_SERVER",
+    ];
+    let get = |k: &str| std::env::var(k).unwrap_or_default();
+    let out = std::path::PathBuf::from(std::env::var("OUT_DIR").unwrap())
+        .join("rd_server_config.rs");
+    let generated = format!(
+        "pub const ID_SERVER: &str = {:?};\npub const KEY: &str = {:?};\npub const API_SERVER: &str = {:?};\npub const RELAY_SERVER: &str = {:?};\n",
+        get(VARS[0]),
+        get(VARS[1]),
+        get(VARS[2]),
+        get(VARS[3]),
+    );
+    std::fs::write(&out, generated).unwrap();
+    for k in VARS {
+        println!("cargo:rerun-if-env-changed={}", k);
+    }
+}
+
 fn main() {
+    embed_server_config();
     hbb_common::gen_version();
     install_android_deps();
     #[cfg(all(windows, feature = "inline"))]
